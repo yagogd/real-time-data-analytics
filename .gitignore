@@ -1,0 +1,31 @@
+*.tsv
+*.csv
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+.venv/
+venv/
+env/
+.ipynb_checkpoints/
+
+# Runtime / local artifacts
+logs/
+data/*
+!data/.gitkeep
+spark-warehouse/
+metastore_db/
+derby.log
+
+# Environment files
+.env
+.env.*
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
