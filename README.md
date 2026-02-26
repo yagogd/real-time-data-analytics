@@ -1,59 +1,53 @@
-﻿# Analisis en Tiempo Real de Bicicletas con Spark, Airflow, Cassandra y Flask
+﻿# Real-Time Bike Analytics with Spark, Airflow, Cassandra, and Flask
 
-## Objetivo
+Language: [Español](README.es.md)
 
-El objetivo de este proyecto es **capturar datos en tiempo real de la API pública de bicicletas**, almacenarlos en **Apache Cassandra**, procesarlos con **Apache Spark** y visualizarlos mediante una aplicación web desarrollada en **Flask**.  
+## Objective
 
-La infraestructura se despliega con **Docker Compose**, integrando además **Apache Airflow** para la planificación de la ingesta de datos en tiempo real.  
+The goal of this project is to **capture real-time data from a public bike API**, store it in **Apache Cassandra**, process it with **Apache Spark**, and visualize it through a **Flask** web application.
 
-En resumen, el proyecto permite:
-- Ingesta periodica de datos de bicicletas publicas desde API externa (CityBikes).
-- Guardar los datos en Cassandra.
-- Procesamiento distribuido con Spark para generar métricas y visualizaciones.
-- Mostrar los resultados en gráficos interactivos vía Flask + Plotly.
+The infrastructure is deployed with **Docker Compose**, and includes **Apache Airflow** to schedule the real-time ingestion workflow.
 
+In short, this project allows you to:
+- Periodically ingest public bike data from an external API (CityBikes).
+- Store the data in Cassandra.
+- Run distributed processing with Spark to generate metrics and visualizations.
+- Display results in interactive charts using Flask + Plotly.
 
-## Arquitectura
+## Architecture
 
 ```text
 CityBikes API
     |
     v
-Airflow DAG (cada 2 min) ----> Script de ingesta  ----> Cassandra
-                                                               |
-                                                               v
-Flask /bicishora ----> Spark Session ----> lectura Cassandra + agregacion ----> Plotly
+Airflow DAG (every 2 min) ----> Ingestion script ----> Cassandra
+                                                              |
+                                                              v
+Flask /bicishora ----> Spark Session ----> read Cassandra + aggregation ----> Plotly
 ```
 
-Componentes principales:
+Main components:
 
--   **API de Bicicletas:** Proporciona datos en tiempo real sobre las estaciones de bicicletas (ej., bicicletas disponibles, estado de la estación). El proyecto utiliza la API de CityBikes como ejemplo.
+- **Bike API:** Provides real-time station data (for example, available bikes and station status). This project uses the CityBikes API as an example.
+- **Apache Airflow:** Orchestrates data ingestion. A DAG (Directed Acyclic Graph) schedules a Spark job that extracts data from the API and stores it in Cassandra. See [`dags/spark_cassandra_bikes_dag.py`](dags/spark_cassandra_bikes_dag.py).
+- **Apache Cassandra:** A scalable NoSQL database used to store raw bike-station data.
+- **Apache Spark:** Processes data from Cassandra to generate aggregated metrics, such as available bikes per hour.
+- **Flask Application:** Web app that queries Cassandra and uses Plotly for interactive charts.
 
--   **Apache Airflow:** Orquesta el proceso de ingesta de datos. Se define un DAG (Directed Acyclic Graph) para programar la ejecución de un trabajo de Spark que extrae datos de la API y los almacena en Cassandra. Ver [`dags/spark_cassandra_bikes_dag.py`](dags/spark_cassandra_bikes_dag.py).
+## Installation
 
--   **Apache Cassandra:** Una base de datos NoSQL escalable utilizada para almacenar los datos brutos de las estaciones de bicicletas.
-
--   **Apache Spark:** Procesa los datos almacenados en Cassandra para generar métricas agregadas, como el número de bicicletas disponibles por hora.
-
--   **Aplicación Flask:** Una aplicación web que consulta Cassandra y utiliza Plotly para crear gráficos interactivos para visualizar los datos.
-
-
-
-
-## Instalacion
-
-1. Clonar repositorio:
+1. Clone the repository:
 
 ```bash
-git clone <URL_DEL_REPOSITORIO>
-cd <NOMBRE_DEL_PROYECTO>
+git clone <REPOSITORY_URL>
+cd <PROJECT_NAME>
 ```
 
-2. Requisito principal:
+2. Main prerequisite:
 
-- Docker Desktop (o Docker Engine + Compose plugin).
+- Docker Desktop (or Docker Engine + Compose plugin).
 
-3. Entorno local opcional (solo para scripts fuera de Docker):
+3. Optional local environment (only for scripts outside Docker):
 
 ```bash
 conda create -y -n pyspark python=3.10
@@ -61,36 +55,34 @@ conda activate pyspark
 pip install -r requirements.txt
 ```
 
-## Despliegue
+## Deployment
 
-1. Levantar todo el stack:
+1. Start the full stack:
 
 ```bash
 docker-compose up -d --build
 ```
 
-2. Verificar interfaces:
+2. Verify interfaces:
 
 - Spark Master UI: [http://localhost:8080](http://localhost:8080)
-- Airflow Webserver: [http://localhost:8084](http://localhost:8084)  (usuario/password por defecto: `airflow` / `airflow`)
+- Airflow Webserver: [http://localhost:8084](http://localhost:8084) (default user/password: `airflow` / `airflow`)
 - Flask App: [http://localhost:5000](http://localhost:5000)
 
-## Uso
+## Usage
 
-1. Configurar y activar el DAG en Airflow::
+1. Configure and enable the Airflow DAG:
 
--   Accede a la interfaz de Airflow en [http://localhost:8084](http://localhost:8084).
--   Localiza el DAG `spark_cassandra_bikes_dag` y actívalo.
--   Monitoriza la ejecución del DAG para verificar la correcta ingesta de datos, este corre cada 2 mins.
+- Open Airflow at [http://localhost:8084](http://localhost:8084).
+- Find DAG `spark_cassandra_bikes_dag` and enable it.
+- Monitor DAG runs to verify ingestion is working correctly (runs every 2 minutes).
 
-2. Consultar datos y analitica:
+2. Query data and analytics:
 
--   Accede a la aplicación Flask en [http://localhost:5000](http://localhost:5000).
--   Visualiza los datos de las estaciones de bicicletas en la página principal.
--   Explora las gráficas generadas con Spark en la ruta `/bicishora`.
+- Open the Flask app at [http://localhost:5000](http://localhost:5000).
+- View bike station data on the main page.
+- Explore Spark-generated charts at `/bicishora`.
 
+## Credits
 
-## License
-
-MIT
-
+The Spark infrastructure is based on the [`easy_spark`](https://github.com/Napuh/easy_spark) repository, used to simplify cluster setup and deployment with Docker.
